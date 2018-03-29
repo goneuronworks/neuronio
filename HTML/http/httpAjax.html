@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Http to Ajax</title>
+
+<script type="text/javascript" src="/security/js/rsa/rsa.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+
+	$(function(){
+		certification();
+	});
+	
+	function certification(){
+		$.ajax({
+			 url: 'http://localhost:5000/certification',
+	  	   data: {
+	  	      format: 'json'
+	  	   },
+	  	   error: function(response) {
+	  	      $('#info').html('<p>An error has occurred</p>');
+	  	   },
+	  	   dataType:'json',
+	  	   success: function(response) {
+	  		   	if(response.success){
+	  	   		$("#rsaPublicKeyModulus").val(response.publicKeyModulus);
+	  	  		$("#rsaPublicKeyExponent").val(response.publicKeyExponent);
+	  	   		}
+	  	   },
+	  	   type: 'GET'
+	  	});	
+	}
+	
+	function submit(){		
+		var rsaPublicKeyModulus = $("#rsaPublicKeyModulus").val();
+		var rsaPublicKeyExponent = $("#rsaPublicKeyExponent").val();
+		
+		var object = new Object();		
+		object['submitType'] = "submit";
+		object['targetOid'] = "T000000074";
+		object['stx'] = "<";
+		object['oid'] = "T000000074";
+		object['msg'] = "Hello, World";
+		object['etx'] = ">";		
+		
+		var encryptMessage = JSON.stringify(object);
+
+		var parameter = new Object();	
+		parameter['encryptMessage'] = submitEncrypted(encryptMessage, rsaPublicKeyModulus, rsaPublicKeyExponent);
+
+		$.ajax({
+       	   url: 'http://localhost:5000/NeuronioExample/HTTPExample/NEURONIOHTTPExampleProtocol',
+       	   data: parameter,
+	   	   type: "GET",
+		   dataType:"json",
+		   xhrFields: {
+		        withCredentials: true
+		   },		   
+       	   success: function(response) {
+
+       	   }
+       	});
+	}
+	
+	function response(){
+		var rsaPublicKeyModulus = $("#rsaPublicKeyModulus").val();
+		var rsaPublicKeyExponent = $("#rsaPublicKeyExponent").val();
+		
+		var object = new Object();	
+		object['submitType'] = "response";
+		object['targetOid'] = "T000000074";
+		object['stx'] = "<";
+		object['oid'] = "T000000074";
+		object['msg'] = "Hello, World";
+		object['etx'] = ">";		
+		
+		var encryptMessage = JSON.stringify(object);
+		var parameter = new Object();	
+		parameter['encryptMessage'] = submitEncrypted(encryptMessage, rsaPublicKeyModulus, rsaPublicKeyExponent);
+		
+		$.ajax({
+       	   url: 'http://localhost:5000/NeuronioExample/HTTPExample/NEURONIOHTTPExampleProtocol',
+       	   data: parameter,
+	   	   type: "GET",
+		   dataType:"json",	
+		   xhrFields: {
+		        withCredentials: true
+		   },		   
+       	   success: function(response) {
+
+       	   }
+       	});	
+	}
+	
+	function login(){		
+	    var username = $("#username").val();
+	    var password = $("#password").val();
+		var rsaPublicKeyModulus = $("#rsaPublicKeyModulus").val();
+		var rsaPublicKeyExponent = $("#rsaPublicKeyExponent").val();
+	    
+	    var parameter = new Object();	
+		parameter['securedUsername'] = submitEncrypted(username, rsaPublicKeyModulus, rsaPublicKeyExponent);
+		parameter['securedPassword'] = submitEncrypted(password, rsaPublicKeyModulus, rsaPublicKeyExponent);	    
+		
+		$.ajax({
+       	   url: 'http://localhost:5000/login',
+       	   data: parameter,
+	   	   type: "POST",
+		   dataType:"json",
+		   xhrFields: {
+		        withCredentials: true
+		   },
+       	   success: function(response) {
+       		   if(response.success){
+       			 $('.button').attr('disabled', false); 
+       		   }       			
+       	   }
+       	});	
+	}
+	
+	function submitEncrypted(encryptMessage, rsaPublicKeyModulus, rsaPpublicKeyExponent) {
+		var rsa = new RSAKey();
+	    rsa.setPublic(rsaPublicKeyModulus, rsaPpublicKeyExponent);
+	    return rsa.encrypt(encryptMessage);	    
+	}		
+</script>
+
+</head>
+<body>
+	<div>
+    	<label for="username">사용자ID : <input type="text" id="username" size="16"/></label>
+    	<label for="password">비밀번호 : <input type="password" id="password" size="16" /></label>
+   		<a href="#" onclick="login(); return false;">로그인</a>
+   	</div>
+   	</br>
+   	<div>
+   		<input type="button" class="button" onclick="submit();" value="submit" disabled/ >
+   		<input type="button" class="button" onclick="response();" value="response" disabled/>	   
+   		<input type="hidden" id="rsaPublicKeyModulus"/>
+   		<input type="hidden" id="rsaPublicKeyExponent"/>
+   </div>   
+</body>
+</html>
