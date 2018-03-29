@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Http to Ajax</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+
+	$(function(){
+		init();
+	});
+	
+	function submit(){		
+		
+		var json = "submitType=submit&targetOid=T000000074&stx=<&oid=T000000074&msg=Hello, Worlde&etx=>";
+
+		$.ajax({
+       	   url: 'http://192.168.0.6:5000/NeuronioExample/HTTPExample/NEURONIOHTTPExampleProtocol',
+       	   data: json,
+	   	   type: "GET",
+		   dataType:"json",
+		   xhrFields: {
+		        withCredentials: true
+		   },		   
+       	   success: function(response) {
+       			console.log(response);
+       	   }
+       	});
+	}
+	
+	function response(){
+		var object = new Object();		
+		var json = "submitType=response&targetOid=T000000074";		
+		
+		$.ajax({
+       	   url: 'http://192.168.0.6:5000/NeuronioExample/HTTPExample/NEURONIOHTTPExampleProtocol',
+       	   data: json,
+	   	   type: "GET",
+		   dataType:"json",
+		   xhrFields: {
+		        withCredentials: true
+		   },		   
+       	   success: function(response) {
+				console.log(response);
+       	   }
+       	});	
+	}
+
+	function login(){		
+	    var parameter = new Object();	
+		parameter['username'] = $("#username").val();
+		parameter['password'] = $("#password").val();	    
+		
+		$.ajax({
+       	   url: 'http://192.168.0.6:5000/login',
+       	   data: parameter,
+	   	   type: "POST",
+		   dataType:"json",
+		   xhrFields: {
+		        withCredentials: true
+		   },
+       	   success: function(response) {
+       		   console.log(response);
+       		   if(response.success){
+       			 $('.button').attr('disabled', false); 
+       		   }       			
+       	   }
+       	});	
+	}		
+</script>
+
+</head>
+<body>
+	<div>
+       <label for="username">사용자ID : <input type="text" id="username" size="16"/></label>
+       <label for="password">비밀번호 : <input type="password" id="password" size="16" /></label>
+       <a href="#" onclick="login(); return false;">로그인</a>
+   </div>
+   </br>
+   
+   <input type="button" class="button" onclick="submit();" value="submit" disabled/ >
+   <input type="button" class="button" onclick="response();" value="response" disabled/>
+</body>
+</html>
